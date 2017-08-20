@@ -8,6 +8,9 @@
 #include <auparse.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <syslog.h>
+#include <sys/stat.h>
+
 
 #define BUFFLEN 524288
 #define MAX_DESCRIPTORS 8192
@@ -93,9 +96,13 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	openlog("audit_log_parser", LOG_PID, LOG_DAEMON);
+
+	syslog(LOG_INFO, "Auditd to JSON daemon has been started");
+
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd == -1) {
-		printf("Couldn't create a socket");
+		syslog(LOG_ERR, "Couldn't create a socket");
 		exit(1);
 	}
 
@@ -106,7 +113,7 @@ int main(int argc, char *argv[])
 	server.sin_port = htons(8888);
 
 	if (bind(server_fd, (struct sockaddr *)&server, sizeof(server)) < 0) {
-		perror("Couldn't bind to the socket");
+		syslog(LOG_ERR, "Couldn't bind to the socket");
 		exit(1);
 	}
 
@@ -118,13 +125,13 @@ int main(int argc, char *argv[])
 		if (client_fd > 0) {
 			au = auparse_init(AUSOURCE_LOGS, NULL);
 			if (au == NULL) {
-				perror("You should run that program with the root privelegies\n");
+				syslog(LOG_ERR, "You should run that program with the root privelegies\n");
 				exit(1);
 			}
 
 			err = auparse_first_record(au);
 			if (err == -1) {
-				perror("Couldn't initialize auparse");
+				syslog(LOG_ERR, "Couldn't initialize auparse");
 				exit(1);
 			}
 
@@ -135,13 +142,15 @@ int main(int argc, char *argv[])
 
 			auparse_destroy(au);
 		} else {
-		    perror("accept failed");
+		    syslog(LOG_ERR, "accept failed");
 		}
 
 		close(client_fd);
 	}
 
 	close(server_fd);
+
+	syslog(LOG_INFO, "Auditd to JSON daemon is has been finished");
 
 	return 0;
 }
