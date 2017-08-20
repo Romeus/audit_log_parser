@@ -16,3 +16,49 @@ Optional:
 Testing:
 
 To test, we should be able to use a simple netcat session, listening on port 8888
+
+===================================================================
+Prerequisites
+
+I tested that project on centos 7.0.
+$ uname -r
+3.10.0-514.6.2.el7.x86_64
+
+
+Before you compile it you need to install the following libraries:
+
+$ sudo yum install json-c jsonc-devel json-c-doc audit
+
+===================================================================
+Installation
+
+Clone that project to a folder, go there and type:
+$ make
+
+The build result is a binary executable: 
+audit_log_parser
+
+===================================================================
+Run
+
+$ sudo ./audit_log_parser
+
+It returns immediately because it is daemonized themself.
+
+
+===================================================================
+Test
+$ netcat localhost 8888
+
+When the ouptut is complete you could break the session using <CTRL-C>
+And you could try this again if you want.
+
+
+===================================================================
+Terminate
+
+$ ps aux | grep audit_log_parser
+
+Then obtain its PID and run:
+
+$ sudo kill -SIGTERM <PID>
