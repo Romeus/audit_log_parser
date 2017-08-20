@@ -40,6 +40,10 @@ $ make
 The build result is a binary executable:
 audit_log_parser
 
+if you want to rebuild the project you should do:
+$ make clean
+$ make
+
 ===================================================================
 
 Run
