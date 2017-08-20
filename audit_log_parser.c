@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
 	close(server_fd);
 
-	syslog(LOG_INFO, "Auditd to JSON daemon is has been finished");
+	syslog(LOG_INFO, "Auditd to JSON daemon has been finished");
 
 	return 0;
 }
