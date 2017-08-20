@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <syslog.h>
 #include <sys/stat.h>
+#include <json/json.h>
 
 
 #define BUFFLEN 524288
@@ -21,6 +22,7 @@ int daemonize(void)
 {
 	int maxfd, fd;
 
+	/* daemonize itself */
 	switch (fork()) {
 	case -1:
 		return -1;
@@ -33,6 +35,7 @@ int daemonize(void)
 	if (setsid() == -1)
 		return -1;
 
+	/* prevents itself from become process leader */
 	switch (fork()) {
 	case -1:
 		return -1;
@@ -70,14 +73,23 @@ char *fetch_next_event(auparse_state_t *au, char *buf)
 {
 	const char *record;
 
+	json_object *jobj = json_object_new_object();
+	*buf = '\0';
+
 	do {
-		*buf = '\0';
-		record = auparse_get_record_text(au);
+		const char *type = auparse_get_type_name(au);
+		json_object *json_type = json_object_new_string(type);
 
-		if (record == NULL)
-			continue;
+		json_object_object_add(jobj, "type", json_type);
 
-		strcat(buf, record);
+		do {
+			json_object *json_field_value = json_object_new_string(auparse_get_field_str(au));
+			json_object_object_add(jobj, auparse_get_field_name(au), json_field_value);
+		} while (auparse_next_field(au) > 0);
+
+		strcat(buf, json_object_to_json_string(jobj));
+		strcat(buf, ",\n\n");
+
 	} while (auparse_next_record(au) > 0);
 
 	return buf;
