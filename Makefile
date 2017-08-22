@@ -1,4 +1,4 @@
-CFLAGS ?= -lauparse -ljson-c
+CFLAGS ?= -lauparse -ljson-c -lcurl
 
 all: audit_log_parser
 

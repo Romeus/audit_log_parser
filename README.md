@@ -28,7 +28,7 @@ $ uname -r
 
 Before you compile it you need to install the following libraries:
 
-$ sudo yum install json-c jsonc-devel json-c-doc audit
+$ sudo yum install json-c jsonc-devel json-c-doc audit libcurl-devel
 
 ===================================================================
 
